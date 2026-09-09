@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	github.com/google/go-jsonnet v0.22.0
-	github.com/marcbran/jpoet v0.21.0
+	github.com/marcbran/jpoet v0.22.0
 	github.com/stretchr/testify v1.12.1
 )
 
