@@ -2,6 +2,7 @@ package grafana
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/marcbran/jsonnet-plugin-telemetry/telemetry"
 )
@@ -25,13 +26,11 @@ type frame struct {
 
 func framesToResult(itemType string, frames []frame) telemetry.QueryResult {
 	if itemType == "logql" {
-		streams := make([]telemetry.Stream, 0, len(frames))
+		records := make([]telemetry.LogRecord, 0, len(frames))
 		for _, f := range frames {
-			if s, ok := frameToStream(f); ok {
-				streams = append(streams, s)
-			}
+			records = append(records, frameToRecords(f)...)
 		}
-		return telemetry.QueryResult{Type: itemType, Streams: streams}
+		return telemetry.QueryResult{Type: itemType, Records: records}
 	}
 	series := make([]telemetry.Series, 0, len(frames))
 	for _, f := range frames {
@@ -55,15 +54,36 @@ func frameToSeries(f frame) (telemetry.Series, bool) {
 	return telemetry.Series{Labels: f.Schema.Fields[1].Labels, Points: points}, true
 }
 
-func frameToStream(f frame) (telemetry.Stream, bool) {
+func frameToRecords(f frame) []telemetry.LogRecord {
 	if len(f.Schema.Fields) < 2 || len(f.Data.Values) < 2 {
-		return telemetry.Stream{}, false
+		return nil
 	}
 	times := f.Data.Values[0]
 	lines := f.Data.Values[1]
-	out := make([][2]string, len(times))
-	for i := range times {
-		out[i] = [2]string{fmt.Sprintf("%v", times[i]), fmt.Sprintf("%v", lines[i])}
+	labels := f.Schema.Fields[1].Labels
+	fields := make(map[string]any, len(labels))
+	for k, v := range labels {
+		fields[k] = v
 	}
-	return telemetry.Stream{Labels: f.Schema.Fields[1].Labels, Lines: out}, true
+	severity := severityFrom(labels)
+	records := make([]telemetry.LogRecord, len(times))
+	for i := range times {
+		ts, _ := times[i].(float64)
+		records[i] = telemetry.LogRecord{
+			Timestamp: ts,
+			Body:      fmt.Sprintf("%v", lines[i]),
+			Severity:  severity,
+			Fields:    fields,
+		}
+	}
+	return records
+}
+
+func severityFrom(labels map[string]string) string {
+	for _, k := range []string{"detected_level", "level", "severity"} {
+		if v, ok := labels[k]; ok && v != "" {
+			return strings.ToLower(v)
+		}
+	}
+	return ""
 }
