@@ -11,15 +11,18 @@ type Series struct {
 	Points [][2]any
 }
 
-type Stream struct {
-	Labels map[string]string
-	Lines  [][2]string
+type LogRecord struct {
+	Timestamp float64
+	Body      string
+	Severity  string
+	Fields    map[string]any
+	ID        string
 }
 
 type QueryResult struct {
 	Type    string
 	Series  []Series
-	Streams []Stream
+	Records []LogRecord
 }
 
 type Backend interface {

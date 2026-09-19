@@ -84,19 +84,27 @@ func TestEncodeResults(t *testing.T) {
 			},
 		},
 		{
-			name: "stream-shaped result",
+			name: "record-shaped result",
 			results: []QueryResult{{
-				Type:    "logql",
-				Streams: []Stream{{Labels: map[string]string{"app": "api"}, Lines: [][2]string{{"0", "boom"}}}},
+				Type: "logql",
+				Records: []LogRecord{{
+					Timestamp: float64(60000),
+					Body:      "boom",
+					Severity:  "error",
+					Fields:    map[string]any{"app": "api"},
+				}},
 			}},
 			want: map[string]any{
 				"results": []any{
 					map[string]any{
 						"type": "logql",
-						"streams": []any{
+						"records": []any{
 							map[string]any{
-								"labels": map[string]any{"app": "api"},
-								"lines":  []any{[]any{"0", "boom"}},
+								"timestamp": float64(60000),
+								"body":      "boom",
+								"severity":  "error",
+								"id":        "",
+								"fields":    map[string]any{"app": "api"},
 							},
 						},
 					},

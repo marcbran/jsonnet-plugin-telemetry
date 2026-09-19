@@ -31,18 +31,18 @@ func TestFramesToResult(t *testing.T) {
 			},
 		},
 		{
-			name:     "logql frame becomes stream",
+			name:     "logql frame becomes records",
 			itemType: "logql",
 			frames: []frame{{
-				Schema: frameSchema{Fields: []frameField{{}, {Labels: map[string]string{"app": "api"}}}},
-				Data:   frameData{Values: [][]any{{float64(0)}, {"boom"}}},
+				Schema: frameSchema{Fields: []frameField{{}, {Labels: map[string]string{"app": "api", "level": "ERROR"}}}},
+				Data:   frameData{Values: [][]any{{float64(0), float64(60000)}, {"boom", "bang"}}},
 			}},
 			want: telemetry.QueryResult{
 				Type: "logql",
-				Streams: []telemetry.Stream{{
-					Labels: map[string]string{"app": "api"},
-					Lines:  [][2]string{{"0", "boom"}},
-				}},
+				Records: []telemetry.LogRecord{
+					{Timestamp: float64(0), Body: "boom", Severity: "error", Fields: map[string]any{"app": "api", "level": "ERROR"}},
+					{Timestamp: float64(60000), Body: "bang", Severity: "error", Fields: map[string]any{"app": "api", "level": "ERROR"}},
+				},
 			},
 		},
 		{

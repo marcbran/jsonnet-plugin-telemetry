@@ -5,8 +5,8 @@ import (
 	"github.com/marcbran/jpoet/pkg/jpoet"
 )
 
-func Plugin(name string, backend Backend, opts ...jpoet.PluginOption) *jpoet.Plugin {
-	return jpoet.NewPlugin(name, []jsonnet.NativeFunction{
+func Plugin(backend Backend, opts ...jpoet.PluginOption) *jpoet.Plugin {
+	return jpoet.NewPlugin("telemetry", []jsonnet.NativeFunction{
 		Query(backend),
 	}, opts...)
 }

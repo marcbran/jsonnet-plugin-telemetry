@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	telemetry.Plugin("telemetry", telemetry.NewRouter(map[string]telemetry.Backend{})).Serve()
+	telemetry.Plugin(telemetry.NewRouter(map[string]telemetry.Backend{})).Serve()
 }

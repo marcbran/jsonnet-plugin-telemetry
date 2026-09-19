@@ -84,8 +84,8 @@ func encodeResult(r QueryResult) map[string]any {
 	if r.Series != nil {
 		m["series"] = encodeSeries(r.Series)
 	}
-	if r.Streams != nil {
-		m["streams"] = encodeStreams(r.Streams)
+	if r.Records != nil {
+		m["records"] = encodeRecords(r.Records)
 	}
 	return m
 }
@@ -106,18 +106,20 @@ func encodeSeries(series []Series) []any {
 	return out
 }
 
-func encodeStreams(streams []Stream) []any {
-	out := make([]any, len(streams))
-	for i, s := range streams {
-		labels := make(map[string]any, len(s.Labels))
-		for k, v := range s.Labels {
-			labels[k] = v
+func encodeRecords(records []LogRecord) []any {
+	out := make([]any, len(records))
+	for i, r := range records {
+		fields := r.Fields
+		if fields == nil {
+			fields = map[string]any{}
 		}
-		lines := make([]any, len(s.Lines))
-		for j, l := range s.Lines {
-			lines[j] = []any{l[0], l[1]}
+		out[i] = map[string]any{
+			"timestamp": r.Timestamp,
+			"body":      r.Body,
+			"fields":    fields,
+			"severity":  r.Severity,
+			"id":        r.ID,
 		}
-		out[i] = map[string]any{"labels": labels, "lines": lines}
 	}
 	return out
 }
