@@ -8,6 +8,8 @@ import (
 )
 
 type frameField struct {
+	Name   string            `json:"name"`
+	Type   string            `json:"type"`
 	Labels map[string]string `json:"labels"`
 }
 
@@ -55,33 +57,46 @@ func frameToSeries(f frame) (telemetry.Series, bool) {
 }
 
 func frameToRecords(f frame) []telemetry.LogRecord {
-	if len(f.Schema.Fields) < 2 || len(f.Data.Values) < 2 {
+	cols := map[string][]any{}
+	for i, field := range f.Schema.Fields {
+		if i < len(f.Data.Values) {
+			cols[field.Name] = f.Data.Values[i]
+		}
+	}
+	times := cols["Time"]
+	lines := cols["Line"]
+	if times == nil || lines == nil {
 		return nil
 	}
-	times := f.Data.Values[0]
-	lines := f.Data.Values[1]
-	labels := f.Schema.Fields[1].Labels
-	fields := make(map[string]any, len(labels))
-	for k, v := range labels {
-		fields[k] = v
-	}
-	severity := severityFrom(labels)
+	labels := cols["labels"]
+	ids := cols["id"]
 	records := make([]telemetry.LogRecord, len(times))
 	for i := range times {
 		ts, _ := times[i].(float64)
+		fields := map[string]any{}
+		if labels != nil {
+			if m, ok := labels[i].(map[string]any); ok {
+				fields = m
+			}
+		}
+		id := ""
+		if ids != nil {
+			id = fmt.Sprintf("%v", ids[i])
+		}
 		records[i] = telemetry.LogRecord{
 			Timestamp: ts,
-			Body:      fmt.Sprintf("%v", lines[i]),
-			Severity:  severity,
+			Body:      strings.TrimRight(fmt.Sprintf("%v", lines[i]), "\r\n"),
+			Severity:  severityFrom(fields),
 			Fields:    fields,
+			ID:        id,
 		}
 	}
 	return records
 }
 
-func severityFrom(labels map[string]string) string {
+func severityFrom(fields map[string]any) string {
 	for _, k := range []string{"detected_level", "level", "severity"} {
-		if v, ok := labels[k]; ok && v != "" {
+		if v, ok := fields[k].(string); ok && v != "" {
 			return strings.ToLower(v)
 		}
 	}

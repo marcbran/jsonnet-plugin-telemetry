@@ -34,14 +34,24 @@ func TestFramesToResult(t *testing.T) {
 			name:     "logql frame becomes records",
 			itemType: "logql",
 			frames: []frame{{
-				Schema: frameSchema{Fields: []frameField{{}, {Labels: map[string]string{"app": "api", "level": "ERROR"}}}},
-				Data:   frameData{Values: [][]any{{float64(0), float64(60000)}, {"boom", "bang"}}},
+				Schema: frameSchema{Fields: []frameField{
+					{Name: "labels", Type: "other"},
+					{Name: "Time", Type: "time"},
+					{Name: "Line", Type: "string"},
+					{Name: "id", Type: "string"},
+				}},
+				Data: frameData{Values: [][]any{
+					{map[string]any{"app": "api", "detected_level": "ERROR"}, map[string]any{"app": "api"}},
+					{float64(0), float64(60000)},
+					{"boom\n", "bang"},
+					{"id-0", "id-1"},
+				}},
 			}},
 			want: telemetry.QueryResult{
 				Type: "logql",
 				Records: []telemetry.LogRecord{
-					{Timestamp: float64(0), Body: "boom", Severity: "error", Fields: map[string]any{"app": "api", "level": "ERROR"}},
-					{Timestamp: float64(60000), Body: "bang", Severity: "error", Fields: map[string]any{"app": "api", "level": "ERROR"}},
+					{Timestamp: float64(0), Body: "boom", Severity: "error", Fields: map[string]any{"app": "api", "detected_level": "ERROR"}, ID: "id-0"},
+					{Timestamp: float64(60000), Body: "bang", Severity: "", Fields: map[string]any{"app": "api"}, ID: "id-1"},
 				},
 			},
 		},
