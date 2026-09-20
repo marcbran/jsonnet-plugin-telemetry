@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.2.0...v0.3.0) (2026-09-20)
+
+
+### Features
+
+* log record ([#11](https://github.com/marcbran/jsonnet-plugin-telemetry/issues/11)) ([747626f](https://github.com/marcbran/jsonnet-plugin-telemetry/commit/747626f21a176730bb98ef6b053ffb73e4dc3dda))
+
+
+### Bug Fixes
+
+* loki frame mapping ([#13](https://github.com/marcbran/jsonnet-plugin-telemetry/issues/13)) ([c1b3f3c](https://github.com/marcbran/jsonnet-plugin-telemetry/commit/c1b3f3c56de5525602241ead16fd400122b6d3f8))
+
 ## [0.2.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.1.0...v0.2.0) (2026-09-09)
 
 
