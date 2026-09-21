@@ -25,6 +25,12 @@ type QueryResult struct {
 	Records []LogRecord
 }
 
+type FetchResult struct {
+	Type   string
+	Record *LogRecord
+}
+
 type Backend interface {
 	Query(items []QueryItem) ([]QueryResult, error)
+	Fetch(typ string, datasource string, id string) (FetchResult, error)
 }

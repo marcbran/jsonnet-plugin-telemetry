@@ -73,3 +73,11 @@ func mergeGroupResults(total int, indexesByGroup [][]int, resultsByGroup [][]Que
 	}
 	return results, nil
 }
+
+func (r *Router) Fetch(typ string, datasource string, id string) (FetchResult, error) {
+	backend, ok := r.backends[typ]
+	if !ok {
+		return FetchResult{}, fmt.Errorf("no backend registered for type %q", typ)
+	}
+	return backend.Fetch(typ, datasource, id)
+}
