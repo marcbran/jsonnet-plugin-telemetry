@@ -31,6 +31,35 @@ func Query(backend Backend) jsonnet.NativeFunction {
 	}
 }
 
+func Fetch(backend Backend) jsonnet.NativeFunction {
+	return jsonnet.NativeFunction{
+		Name:   "fetch",
+		Params: ast.Identifiers{"type", "datasource", "id"},
+		Func: func(input []any) (any, error) {
+			if len(input) != 3 {
+				return nil, fmt.Errorf("expected type, datasource, and id arguments")
+			}
+			typ, ok := input[0].(string)
+			if !ok || typ == "" {
+				return nil, fmt.Errorf("type must be a non-empty string")
+			}
+			datasource, ok := input[1].(string)
+			if !ok {
+				return nil, fmt.Errorf("datasource must be a string")
+			}
+			id, ok := input[2].(string)
+			if !ok || id == "" {
+				return nil, fmt.Errorf("id must be a non-empty string")
+			}
+			result, err := backend.Fetch(typ, datasource, id)
+			if err != nil {
+				return nil, err
+			}
+			return encodeFetchResult(result), nil
+		},
+	}
+}
+
 func parseQueryItems(raw any) ([]QueryItem, error) {
 	list, ok := raw.([]any)
 	if !ok {
@@ -109,17 +138,29 @@ func encodeSeries(series []Series) []any {
 func encodeRecords(records []LogRecord) []any {
 	out := make([]any, len(records))
 	for i, r := range records {
-		fields := r.Fields
-		if fields == nil {
-			fields = map[string]any{}
-		}
-		out[i] = map[string]any{
-			"timestamp": r.Timestamp,
-			"body":      r.Body,
-			"fields":    fields,
-			"severity":  r.Severity,
-			"id":        r.ID,
-		}
+		out[i] = encodeRecord(r)
 	}
 	return out
+}
+
+func encodeRecord(r LogRecord) map[string]any {
+	fields := r.Fields
+	if fields == nil {
+		fields = map[string]any{}
+	}
+	return map[string]any{
+		"timestamp": r.Timestamp,
+		"body":      r.Body,
+		"fields":    fields,
+		"severity":  r.Severity,
+		"id":        r.ID,
+	}
+}
+
+func encodeFetchResult(r FetchResult) map[string]any {
+	m := map[string]any{"type": r.Type}
+	if r.Record != nil {
+		m["record"] = encodeRecord(*r.Record)
+	}
+	return m
 }

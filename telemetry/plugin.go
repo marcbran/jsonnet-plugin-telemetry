@@ -8,5 +8,6 @@ import (
 func Plugin(backend Backend, opts ...jpoet.PluginOption) *jpoet.Plugin {
 	return jpoet.NewPlugin("telemetry", []jsonnet.NativeFunction{
 		Query(backend),
+		Fetch(backend),
 	}, opts...)
 }
