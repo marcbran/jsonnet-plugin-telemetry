@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.3.0...v0.4.0) (2026-09-21)
+
+
+### Features
+
+* add fetch to jsonnet lib ([#16](https://github.com/marcbran/jsonnet-plugin-telemetry/issues/16)) ([ab4d9c2](https://github.com/marcbran/jsonnet-plugin-telemetry/commit/ab4d9c2e40ff7470ca6f655023e92dcfda4bd842))
+* resolve method ([#14](https://github.com/marcbran/jsonnet-plugin-telemetry/issues/14)) ([2937e24](https://github.com/marcbran/jsonnet-plugin-telemetry/commit/2937e24b99ab73d0ceef7f5c49b58ac039f00356))
+
 ## [0.3.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.2.0...v0.3.0) (2026-09-20)
 
 
