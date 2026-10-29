@@ -30,16 +30,22 @@ func WithHTTPClient(client *http.Client) Option {
 	return func(b *Backend) { b.client = client }
 }
 
+func WithMaxDataPoints(n int) Option {
+	return func(b *Backend) { b.maxDataPoints = n }
+}
+
 type Backend struct {
-	auth        Auth
-	datasources map[string]Datasource
-	client      *http.Client
+	auth          Auth
+	datasources   map[string]Datasource
+	client        *http.Client
+	maxDataPoints int
 }
 
 func New(datasources map[string]Datasource, opts ...Option) *Backend {
 	b := &Backend{
-		datasources: datasources,
-		client:      &http.Client{Timeout: 30 * time.Second},
+		datasources:   datasources,
+		client:        &http.Client{Timeout: 30 * time.Second},
+		maxDataPoints: 1500,
 	}
 	for _, opt := range opts {
 		opt(b)
@@ -73,11 +79,12 @@ type dsQueryTarget struct {
 }
 
 type dsQuery struct {
-	RefID      string        `json:"refId"`
-	Datasource dsQueryTarget `json:"datasource"`
-	Expr       string        `json:"expr"`
-	Instant    bool          `json:"instant"`
-	Range      bool          `json:"range"`
+	RefID         string        `json:"refId"`
+	Datasource    dsQueryTarget `json:"datasource"`
+	Expr          string        `json:"expr"`
+	Instant       bool          `json:"instant"`
+	Range         bool          `json:"range"`
+	MaxDataPoints int           `json:"maxDataPoints,omitempty"`
 }
 
 type dsQueryRequest struct {
@@ -98,11 +105,12 @@ func (b *Backend) runQuery(g requestGroup) (map[string][]frame, error) {
 	queries := make([]dsQuery, len(g.items))
 	for i, ri := range g.items {
 		queries[i] = dsQuery{
-			RefID:      ri.refID,
-			Datasource: dsQueryTarget{Type: ri.datasource.Type, UID: ri.datasource.UID},
-			Expr:       ri.expr,
-			Instant:    ri.instant,
-			Range:      !ri.instant,
+			RefID:         ri.refID,
+			Datasource:    dsQueryTarget{Type: ri.datasource.Type, UID: ri.datasource.UID},
+			Expr:          ri.expr,
+			Instant:       ri.instant,
+			Range:         !ri.instant,
+			MaxDataPoints: b.maxDataPoints,
 		}
 	}
 	reqBody, err := json.Marshal(dsQueryRequest{Queries: queries, From: g.from, To: g.to})
