@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.4.0...v0.5.0) (2026-10-29)
+
+
+### Features
+
+* max data points ([#23](https://github.com/marcbran/jsonnet-plugin-telemetry/issues/23)) ([75f8d19](https://github.com/marcbran/jsonnet-plugin-telemetry/commit/75f8d19b093d1220ff4e7ea4ff7bc90c2d7eab0c))
+
 ## [0.4.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.3.0...v0.4.0) (2026-09-21)
 
 
