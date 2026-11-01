@@ -1,20 +1,27 @@
+tool := "go tool -modfile=tools/go.mod"
+
 test-go:
     go test -v -cover -timeout=120s -parallel=10 ./...
 
 test-jsonnet:
-    jpoet test .
+    {{tool}} jpoet test .
 
 test: test-go test-jsonnet
 
 lint-go:
-    golangci-lint run ./...
+    {{tool}} golangci-lint run ./...
 
 lint: lint-go
 
+vuln-go:
+    {{tool}} govulncheck ./...
+
+vuln: vuln-go
+
 build:
-    jpoet pkg build
+    {{tool}} jpoet pkg build
 
 push: build
-    jpoet pkg push
+    {{tool}} jpoet pkg push
 
-ci: lint test build
+ci: lint vuln test build
