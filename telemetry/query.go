@@ -2,9 +2,11 @@ package telemetry
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/ast"
+	"github.com/marcbran/jpoet/pkg/jpoet"
 )
 
 func Query(backend Backend) jsonnet.NativeFunction {
@@ -13,18 +15,18 @@ func Query(backend Backend) jsonnet.NativeFunction {
 		Params: ast.Identifiers{"items"},
 		Func: func(input []any) (any, error) {
 			if len(input) != 1 {
-				return nil, fmt.Errorf("expected a single items array argument")
+				return nil, jpoet.NewFailure(http.StatusBadRequest, "expected a single items array argument")
 			}
 			items, err := parseQueryItems(input[0])
 			if err != nil {
-				return nil, err
+				return nil, jpoet.NewFailure(http.StatusBadRequest, err.Error())
 			}
 			results, err := backend.Query(items)
 			if err != nil {
-				return nil, err
+				return nil, FailureFor(err)
 			}
 			if len(results) != len(items) {
-				return nil, fmt.Errorf("backend returned %d results for %d queries", len(results), len(items))
+				return nil, jpoet.NewFailure(http.StatusInternalServerError, fmt.Sprintf("backend returned %d results for %d queries", len(results), len(items)))
 			}
 			return encodeResults(results), nil
 		},
@@ -37,23 +39,23 @@ func Fetch(backend Backend) jsonnet.NativeFunction {
 		Params: ast.Identifiers{"type", "datasource", "id"},
 		Func: func(input []any) (any, error) {
 			if len(input) != 3 {
-				return nil, fmt.Errorf("expected type, datasource, and id arguments")
+				return nil, jpoet.NewFailure(http.StatusBadRequest, "expected type, datasource, and id arguments")
 			}
 			typ, ok := input[0].(string)
 			if !ok || typ == "" {
-				return nil, fmt.Errorf("type must be a non-empty string")
+				return nil, jpoet.NewFailure(http.StatusBadRequest, "type must be a non-empty string")
 			}
 			datasource, ok := input[1].(string)
 			if !ok {
-				return nil, fmt.Errorf("datasource must be a string")
+				return nil, jpoet.NewFailure(http.StatusBadRequest, "datasource must be a string")
 			}
 			id, ok := input[2].(string)
 			if !ok || id == "" {
-				return nil, fmt.Errorf("id must be a non-empty string")
+				return nil, jpoet.NewFailure(http.StatusBadRequest, "id must be a non-empty string")
 			}
 			result, err := backend.Fetch(typ, datasource, id)
 			if err != nil {
-				return nil, err
+				return nil, FailureFor(err)
 			}
 			return encodeFetchResult(result), nil
 		},
@@ -109,6 +111,9 @@ func encodeResults(results []QueryResult) any {
 }
 
 func encodeResult(r QueryResult) map[string]any {
+	if r.Failure != nil {
+		return r.Failure.Value()
+	}
 	m := map[string]any{"type": r.Type}
 	if r.Series != nil {
 		m["series"] = encodeSeries(r.Series)
