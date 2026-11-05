@@ -2,19 +2,21 @@ package grafana
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/marcbran/jpoet/pkg/jpoet"
 	"github.com/marcbran/jsonnet-plugin-telemetry/telemetry"
 )
 
 func (b *Backend) Fetch(typ string, datasource string, id string) (telemetry.FetchResult, error) {
 	if typ != "logql" {
-		return telemetry.FetchResult{}, fmt.Errorf("fetch not supported for type %q", typ)
+		return telemetry.FetchResult{}, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("fetch not supported for type %q", typ))
 	}
 	ds, ok := b.datasources[datasource]
 	if !ok {
-		return telemetry.FetchResult{}, fmt.Errorf("unknown datasource %q", datasource)
+		return telemetry.FetchResult{}, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("unknown datasource %q", datasource))
 	}
 	nanos := id
 	if i := strings.IndexByte(id, '_'); i >= 0 {
@@ -22,7 +24,7 @@ func (b *Backend) Fetch(typ string, datasource string, id string) (telemetry.Fet
 	}
 	ns, err := strconv.ParseInt(nanos, 10, 64)
 	if err != nil {
-		return telemetry.FetchResult{}, fmt.Errorf("invalid record id %q", id)
+		return telemetry.FetchResult{}, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("invalid record id %q", id))
 	}
 	from := strconv.FormatInt(ns/1_000_000, 10)
 	to := strconv.FormatInt(ns/1_000_000+1, 10)
@@ -52,5 +54,5 @@ func (b *Backend) Fetch(typ string, datasource string, id string) (telemetry.Fet
 			return telemetry.FetchResult{Type: "logql", Record: &record}, nil
 		}
 	}
-	return telemetry.FetchResult{}, fmt.Errorf("record %q not found", id)
+	return telemetry.FetchResult{}, jpoet.NewFailure(http.StatusNotFound, fmt.Sprintf("record %q not found", id))
 }

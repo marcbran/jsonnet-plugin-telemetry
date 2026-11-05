@@ -1,6 +1,11 @@
 package telemetry
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/marcbran/jpoet/pkg/jpoet"
+)
 
 type Router struct {
 	backends map[string]Backend
@@ -24,7 +29,7 @@ func (r *Router) Query(items []QueryItem) ([]QueryResult, error) {
 		}
 		subResults, err := g.key.Query(sub)
 		if err != nil {
-			return nil, err
+			subResults = failedResults(sub, err)
 		}
 		indexesByGroup[i] = g.indexes
 		resultsByGroup[i] = subResults
@@ -43,7 +48,7 @@ func groupBy[K comparable](items []QueryItem, keyForType map[string]K) ([]group[
 	for i, item := range items {
 		key, ok := keyForType[item.Type]
 		if !ok {
-			return nil, fmt.Errorf("no backend registered for type %q", item.Type)
+			return nil, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("no backend registered for type %q", item.Type))
 		}
 		g, ok := byKey[key]
 		if !ok {
@@ -77,7 +82,16 @@ func mergeGroupResults(total int, indexesByGroup [][]int, resultsByGroup [][]Que
 func (r *Router) Fetch(typ string, datasource string, id string) (FetchResult, error) {
 	backend, ok := r.backends[typ]
 	if !ok {
-		return FetchResult{}, fmt.Errorf("no backend registered for type %q", typ)
+		return FetchResult{}, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("no backend registered for type %q", typ))
 	}
 	return backend.Fetch(typ, datasource, id)
+}
+
+func failedResults(items []QueryItem, err error) []QueryResult {
+	failure := FailureFor(err)
+	results := make([]QueryResult, len(items))
+	for i, item := range items {
+		results[i] = QueryResult{Type: item.Type, Failure: failure}
+	}
+	return results
 }

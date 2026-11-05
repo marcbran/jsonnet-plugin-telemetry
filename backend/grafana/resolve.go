@@ -2,7 +2,9 @@ package grafana
 
 import (
 	"fmt"
+	"net/http"
 
+	"github.com/marcbran/jpoet/pkg/jpoet"
 	"github.com/marcbran/jsonnet-plugin-telemetry/telemetry"
 )
 
@@ -23,19 +25,19 @@ func resolveItems(items []telemetry.QueryItem, datasources map[string]Datasource
 	for i, item := range items {
 		ds, ok := datasources[item.Datasource]
 		if !ok {
-			return nil, fmt.Errorf("items[%d]: unknown datasource %q", i, item.Datasource)
+			return nil, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("items[%d]: unknown datasource %q", i, item.Datasource))
 		}
 		expr, ok := item.Params["expr"].(string)
 		if !ok || expr == "" {
-			return nil, fmt.Errorf("items[%d]: expr must be a non-empty string", i)
+			return nil, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("items[%d]: expr must be a non-empty string", i))
 		}
 		from, ok := item.Params["from"].(string)
 		if !ok || from == "" {
-			return nil, fmt.Errorf("items[%d]: from must be a non-empty string", i)
+			return nil, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("items[%d]: from must be a non-empty string", i))
 		}
 		to, ok := item.Params["to"].(string)
 		if !ok || to == "" {
-			return nil, fmt.Errorf("items[%d]: to must be a non-empty string", i)
+			return nil, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("items[%d]: to must be a non-empty string", i))
 		}
 		instant, _ := item.Params["instant"].(bool)
 		resolved[i] = resolvedItem{

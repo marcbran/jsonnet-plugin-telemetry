@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/marcbran/jpoet/pkg/jpoet"
 	"github.com/marcbran/jsonnet-plugin-telemetry/telemetry"
 )
 
@@ -64,7 +65,11 @@ func (b *Backend) Query(items []telemetry.QueryItem) ([]telemetry.QueryResult, e
 	for _, g := range groups {
 		framesByRefID, err := b.runQuery(g)
 		if err != nil {
-			return nil, err
+			failure := telemetry.FailureFor(err)
+			for _, ri := range g.items {
+				results[ri.index] = telemetry.QueryResult{Type: ri.itemType, Failure: failure}
+			}
+			continue
 		}
 		for _, ri := range g.items {
 			results[ri.index] = framesToResult(ri.itemType, framesByRefID[ri.refID])
@@ -125,7 +130,7 @@ func (b *Backend) runQuery(g requestGroup) (map[string][]frame, error) {
 	req.Header.Set("Content-Type", "application/json")
 	if b.auth != nil {
 		if err := b.auth(req); err != nil {
-			return nil, err
+			return nil, jpoet.NewFailure(http.StatusUnauthorized, fmt.Sprintf("grafana auth: %s", err))
 		}
 	}
 
@@ -140,7 +145,7 @@ func (b *Backend) runQuery(g requestGroup) (map[string][]frame, error) {
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("grafana request failed: %s: %s", resp.Status, strings.TrimSpace(string(respBody)))
+		return nil, jpoet.NewFailure(resp.StatusCode, fmt.Sprintf("grafana request failed: %s: %s", resp.Status, strings.TrimSpace(string(respBody))))
 	}
 
 	var parsed dsQueryResponse

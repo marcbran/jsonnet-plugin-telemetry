@@ -1,5 +1,7 @@
 package telemetry
 
+import "github.com/marcbran/jpoet/pkg/jpoet"
+
 type QueryItem struct {
 	Type       string
 	Datasource string
@@ -23,6 +25,7 @@ type QueryResult struct {
 	Type    string
 	Series  []Series
 	Records []LogRecord
+	Failure *jpoet.Failure
 }
 
 type FetchResult struct {
