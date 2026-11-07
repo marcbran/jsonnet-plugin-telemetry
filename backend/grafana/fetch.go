@@ -1,6 +1,7 @@
 package grafana
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 	"github.com/marcbran/jsonnet-plugin-telemetry/telemetry"
 )
 
-func (b *Backend) Fetch(typ string, datasource string, id string) (telemetry.FetchResult, error) {
+func (b *Backend) Fetch(ctx context.Context, typ string, datasource string, id string) (telemetry.FetchResult, error) {
 	if typ != "logql" {
 		return telemetry.FetchResult{}, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("fetch not supported for type %q", typ))
 	}
@@ -43,7 +44,7 @@ func (b *Backend) Fetch(typ string, datasource string, id string) (telemetry.Fet
 			to:         to,
 		}},
 	}
-	framesByRefID, err := b.runQuery(g)
+	framesByRefID, err := b.runQuery(ctx, g)
 	if err != nil {
 		return telemetry.FetchResult{}, err
 	}

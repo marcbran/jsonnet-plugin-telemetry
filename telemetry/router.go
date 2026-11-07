@@ -1,6 +1,7 @@
 package telemetry
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -15,7 +16,7 @@ func NewRouter(backends map[string]Backend) *Router {
 	return &Router{backends: backends}
 }
 
-func (r *Router) Query(items []QueryItem) ([]QueryResult, error) {
+func (r *Router) Query(ctx context.Context, items []QueryItem) ([]QueryResult, error) {
 	groups, err := groupBy(items, r.backends)
 	if err != nil {
 		return nil, err
@@ -27,7 +28,7 @@ func (r *Router) Query(items []QueryItem) ([]QueryResult, error) {
 		for j, idx := range g.indexes {
 			sub[j] = items[idx]
 		}
-		subResults, err := g.key.Query(sub)
+		subResults, err := g.key.Query(ctx, sub)
 		if err != nil {
 			subResults = failedResults(sub, err)
 		}
@@ -79,12 +80,12 @@ func mergeGroupResults(total int, indexesByGroup [][]int, resultsByGroup [][]Que
 	return results, nil
 }
 
-func (r *Router) Fetch(typ string, datasource string, id string) (FetchResult, error) {
+func (r *Router) Fetch(ctx context.Context, typ string, datasource string, id string) (FetchResult, error) {
 	backend, ok := r.backends[typ]
 	if !ok {
 		return FetchResult{}, jpoet.NewFailure(http.StatusBadRequest, fmt.Sprintf("no backend registered for type %q", typ))
 	}
-	return backend.Fetch(typ, datasource, id)
+	return backend.Fetch(ctx, typ, datasource, id)
 }
 
 func failedResults(items []QueryItem, err error) []QueryResult {

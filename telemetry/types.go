@@ -1,6 +1,10 @@
 package telemetry
 
-import "github.com/marcbran/jpoet/pkg/jpoet"
+import (
+	"context"
+
+	"github.com/marcbran/jpoet/pkg/jpoet"
+)
 
 type QueryItem struct {
 	Type       string
@@ -34,6 +38,6 @@ type FetchResult struct {
 }
 
 type Backend interface {
-	Query(items []QueryItem) ([]QueryResult, error)
-	Fetch(typ string, datasource string, id string) (FetchResult, error)
+	Query(ctx context.Context, items []QueryItem) ([]QueryResult, error)
+	Fetch(ctx context.Context, typ string, datasource string, id string) (FetchResult, error)
 }

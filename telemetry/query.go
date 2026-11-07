@@ -1,19 +1,17 @@
 package telemetry
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
-	"github.com/google/go-jsonnet"
-	"github.com/google/go-jsonnet/ast"
 	"github.com/marcbran/jpoet/pkg/jpoet"
 )
 
-func Query(backend Backend) jsonnet.NativeFunction {
-	return jsonnet.NativeFunction{
-		Name:   "query",
-		Params: ast.Identifiers{"items"},
-		Func: func(input []any) (any, error) {
+func Query(backend Backend) jpoet.Function {
+	return jpoet.Function{
+		Name: "query",
+		Func: func(ctx context.Context, input []any) (any, error) {
 			if len(input) != 1 {
 				return nil, jpoet.NewFailure(http.StatusBadRequest, "expected a single items array argument")
 			}
@@ -21,7 +19,7 @@ func Query(backend Backend) jsonnet.NativeFunction {
 			if err != nil {
 				return nil, jpoet.NewFailure(http.StatusBadRequest, err.Error())
 			}
-			results, err := backend.Query(items)
+			results, err := backend.Query(ctx, items)
 			if err != nil {
 				return nil, FailureFor(err)
 			}
@@ -33,11 +31,10 @@ func Query(backend Backend) jsonnet.NativeFunction {
 	}
 }
 
-func Fetch(backend Backend) jsonnet.NativeFunction {
-	return jsonnet.NativeFunction{
-		Name:   "fetch",
-		Params: ast.Identifiers{"type", "datasource", "id"},
-		Func: func(input []any) (any, error) {
+func Fetch(backend Backend) jpoet.Function {
+	return jpoet.Function{
+		Name: "fetch",
+		Func: func(ctx context.Context, input []any) (any, error) {
 			if len(input) != 3 {
 				return nil, jpoet.NewFailure(http.StatusBadRequest, "expected type, datasource, and id arguments")
 			}
@@ -53,7 +50,7 @@ func Fetch(backend Backend) jsonnet.NativeFunction {
 			if !ok || id == "" {
 				return nil, jpoet.NewFailure(http.StatusBadRequest, "id must be a non-empty string")
 			}
-			result, err := backend.Fetch(typ, datasource, id)
+			result, err := backend.Fetch(ctx, typ, datasource, id)
 			if err != nil {
 				return nil, FailureFor(err)
 			}
