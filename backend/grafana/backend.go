@@ -2,6 +2,7 @@ package grafana
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -54,7 +55,7 @@ func New(datasources map[string]Datasource, opts ...Option) *Backend {
 	return b
 }
 
-func (b *Backend) Query(items []telemetry.QueryItem) ([]telemetry.QueryResult, error) {
+func (b *Backend) Query(ctx context.Context, items []telemetry.QueryItem) ([]telemetry.QueryResult, error) {
 	resolved, err := resolveItems(items, b.datasources)
 	if err != nil {
 		return nil, err
@@ -63,7 +64,7 @@ func (b *Backend) Query(items []telemetry.QueryItem) ([]telemetry.QueryResult, e
 
 	results := make([]telemetry.QueryResult, len(items))
 	for _, g := range groups {
-		framesByRefID, err := b.runQuery(g)
+		framesByRefID, err := b.runQuery(ctx, g)
 		if err != nil {
 			failure := telemetry.FailureFor(err)
 			for _, ri := range g.items {
@@ -106,7 +107,7 @@ type dsQueryResponse struct {
 	Results map[string]dsQueryResult `json:"results"`
 }
 
-func (b *Backend) runQuery(g requestGroup) (map[string][]frame, error) {
+func (b *Backend) runQuery(ctx context.Context, g requestGroup) (map[string][]frame, error) {
 	queries := make([]dsQuery, len(g.items))
 	for i, ri := range g.items {
 		queries[i] = dsQuery{
@@ -123,7 +124,7 @@ func (b *Backend) runQuery(g requestGroup) (map[string][]frame, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, strings.TrimRight(g.baseURL, "/")+"/api/ds/query", bytes.NewReader(reqBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(g.baseURL, "/")+"/api/ds/query", bytes.NewReader(reqBody))
 	if err != nil {
 		return nil, err
 	}
