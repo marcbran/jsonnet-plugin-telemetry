@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.6.0...v0.7.0) (2026-11-07)
+
+
+### Features
+
+* pass the evaluation context to plugin calls ([#29](https://github.com/marcbran/jsonnet-plugin-telemetry/issues/29)) ([dd140c9](https://github.com/marcbran/jsonnet-plugin-telemetry/commit/dd140c9f1e05535594c75f62bea1002308c6b9de))
+
 ## [0.6.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.5.0...v0.6.0) (2026-11-05)
 
 
