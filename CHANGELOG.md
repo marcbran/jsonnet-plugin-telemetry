@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.7.0...v0.8.0) (2026-11-08)
+
+
+### Features
+
+* add arcourse-telemetry and arcourse-echarts packages ([#33](https://github.com/marcbran/jsonnet-plugin-telemetry/issues/33)) ([82e4b5c](https://github.com/marcbran/jsonnet-plugin-telemetry/commit/82e4b5c2b69af35f0e2286e7f44c298057ff1641))
+
 ## [0.7.0](https://github.com/marcbran/jsonnet-plugin-telemetry/compare/v0.6.0...v0.7.0) (2026-11-07)
 
 
