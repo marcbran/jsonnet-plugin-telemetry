@@ -3,7 +3,9 @@ module github.com/marcbran/jsonnet-plugin-telemetry
 go 1.26.3
 
 require (
-	github.com/marcbran/jpoet v0.29.0
+	github.com/marcbran/jpoet v0.30.0
+	github.com/marcbran/jsonnet-plugin-html v0.3.0
+	github.com/marcbran/jsonnet-plugin-url v0.1.0
 	github.com/stretchr/testify v1.12.1
 )
 

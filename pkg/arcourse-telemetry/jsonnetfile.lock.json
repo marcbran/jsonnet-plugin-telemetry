@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/marcbran/jsonnet.git",
+          "subdir": "arcourse/arcourse-graph"
+        }
+      },
+      "version": "4bc367ef133ccccf44a3861e5957a235894f94da",
+      "sum": "CMXMcdhQTpMcq6aL4pH9jdEdiugPNxKcvC18IlJE9wc="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/marcbran/jsonnet.git",
+          "subdir": "arcourse/arcourse-ui"
+        }
+      },
+      "version": "ecd30b42542a7ddc3dc753d77605dfdf3c5302b5",
+      "sum": "cFjqoUdSpm/r3Nz47cukXzhg5oMuhrXKfd/EfMR9RSI="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/marcbran/jsonnet.git",
+          "subdir": "plugin/html"
+        }
+      },
+      "version": "f8fbca4ece920b1f694ef55cf5faff01b3f05501",
+      "sum": "6o+PCH5fn0DzThZx2lK972203J+M86sH3ju9itLKwYU="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/marcbran/jsonnet.git",
+          "subdir": "plugin/time"
+        }
+      },
+      "version": "bee48c3f21597260c1da99f82deafa212b896e67",
+      "sum": "S0pmh/pkrciYZ3XxZ6Fi6RP9N13Fu9mM3jcIy6xiWCA="
+    }
+  ],
+  "legacyImports": false
+}

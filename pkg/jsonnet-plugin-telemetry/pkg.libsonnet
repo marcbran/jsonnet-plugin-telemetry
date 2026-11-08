@@ -1,7 +1,7 @@
 local p = import 'pkg/main.libsonnet';
 
 p.pkg({
-  source: 'https://github.com/marcbran/jsonnet-plugin-telemetry',
+  source: 'https://github.com/marcbran/jsonnet-plugin-telemetry/tree/main/pkg/jsonnet-plugin-telemetry',
   repo: 'https://github.com/marcbran/jsonnet.git',
   branch: 'plugin/telemetry',
   path: 'plugin/telemetry',
